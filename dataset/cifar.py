@@ -40,7 +40,6 @@ class CifarData:
         self._data = self._data[indices_shuffled]
         self._labels = self._labels[indices_shuffled]
 
-
     def next_batch(self, batch_size=128):
         end_indicator = self._indicator + batch_size
         if end_indicator > self._num_examples:
@@ -49,7 +48,7 @@ class CifarData:
                 self._indicator = 0
                 end_indicator = batch_size
             else:
-                raise Exception("Have no more examples!!!")
+                raise Exception("There have no more examples!!!")
         if end_indicator > self._num_examples:
             raise Exception("The size of one batch is larger than the number of examples!!!")
         batch_data = self._data[self._indicator:end_indicator]

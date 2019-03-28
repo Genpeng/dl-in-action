@@ -21,7 +21,6 @@ def main():
     W = tf.get_variable(name='W', shape=[X.get_shape()[-1], 10], initializer=tf.random_normal_initializer(0, 1))  # (3072, 10)
     b = tf.get_variable(name='b', shape=[10], initializer=tf.constant_initializer(0.0))  # (10, )
 
-    # output
     Z = tf.matmul(X, W) + b  # (None, 10)
 
     # loss
