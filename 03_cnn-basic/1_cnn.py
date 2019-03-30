@@ -100,9 +100,9 @@ def main():
             batch_data_train, batch_labels_train = train_data.next_batch(batch_size)
             loss_train, acc_train, _ = sess.run(fetches=[loss, accuracy, train_op],
                                                 feed_dict={X: batch_data_train, y: batch_labels_train})
-            if i % 500 == 0:
+            if i % 100 == 0:
                 print("[Train] Step: %6d, loss: %4.5f, acc: %4.5f" % (i, loss_train, acc_train))
-            if i % 5000 == 0:
+            if i % 1000 == 0:
                 test_data = CifarData(test_filepaths)
                 losses_test, accs_test = [], []
                 for j in range(test_steps):
