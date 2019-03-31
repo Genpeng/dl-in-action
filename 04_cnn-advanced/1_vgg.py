@@ -14,6 +14,7 @@ Date:   2019/03/30
 import os
 import numpy as np
 import tensorflow as tf
+from time import time
 from dataset.cifar import CifarData
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
@@ -119,6 +120,10 @@ def main():
     # Use session to execute the graph
     # ========================================================================================== #
 
+    print("[INFO] Start training...")
+    print()
+    t0 = time()
+
     batch_size = 20
     train_steps = 10000
     test_steps = 500
@@ -151,8 +156,11 @@ def main():
                 print()
                 print("[Test ] Step: %6d, loss: %4.5f, acc: %4.5f" % (i, loss_test, acc_test))
                 print()
-
     writer.close()
+
+    print()
+    print("[INFO] Traning finished! ( ^ _ ^ ) V")
+    print("[INFO] Done in %f seconds." % (time() - t0))
 
 
 if __name__ == '__main__':
