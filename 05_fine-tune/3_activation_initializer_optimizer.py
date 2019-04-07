@@ -25,6 +25,80 @@ CIFAR_DIR = "../data/cifar-10-batches-py/"
 LOG_DIR = "./runs"
 
 
+def build_vgg_net(inputs, activation, kernel_initializer):
+    # two convolution block 1
+    conv1_1 = tf.layers.conv2d(inputs=inputs,
+                               filters=32,
+                               kernel_size=(3, 3),
+                               strides=(1, 1),
+                               padding='same',
+                               activation=activation,
+                               kernel_initializer=kernel_initializer,
+                               name='conv1_1')  # 32 @ 32 * 32
+    conv1_2 = tf.layers.conv2d(inputs=conv1_1,
+                               filters=32,
+                               kernel_size=(3, 3),
+                               strides=(1, 1),
+                               padding='same',
+                               activation=activation,
+                               kernel_initializer=kernel_initializer,
+                               name='conv1_2')  # 32 @ 32 * 32
+    pool1 = tf.layers.max_pooling2d(inputs=conv1_2,
+                                    pool_size=(2, 2),
+                                    strides=(2, 2),
+                                    padding='valid',
+                                    name='pool1')  # 32 @ 16 * 16
+    # two convolution block 2
+    conv2_1 = tf.layers.conv2d(inputs=pool1,
+                               filters=32,
+                               kernel_size=(3, 3),
+                               strides=(1, 1),
+                               padding='same',
+                               activation=activation,
+                               kernel_initializer=kernel_initializer,
+                               name='conv2_1')  # 32 @ 16 * 16
+    conv2_2 = tf.layers.conv2d(inputs=conv2_1,
+                               filters=32,
+                               kernel_size=(3, 3),
+                               strides=(1, 1),
+                               padding='same',
+                               activation=activation,
+                               kernel_initializer=kernel_initializer,
+                               name='conv2_2')  # 32 @ 16 * 16
+
+    pool2 = tf.layers.max_pooling2d(inputs=conv2_2,
+                                    pool_size=(2, 2),
+                                    strides=(2, 2),
+                                    padding='valid',
+                                    name='pool2')  # 32 @ 8 * 8
+    # two convolution block 3
+    conv3_1 = tf.layers.conv2d(inputs=pool2,
+                               filters=32,
+                               kernel_size=(3, 3),
+                               strides=(1, 1),
+                               padding='same',
+                               activation=activation,
+                               kernel_initializer=kernel_initializer,
+                               name='conv3_1')  # 32 @ 8 * 8
+    conv3_2 = tf.layers.conv2d(inputs=conv3_1,
+                               filters=32,
+                               kernel_size=(3, 3),
+                               strides=(1, 1),
+                               padding='same',
+                               activation=activation,
+                               kernel_initializer=kernel_initializer,
+                               name='conv3_2')  # 32 @ 8 * 8
+    pool3 = tf.layers.max_pooling2d(inputs=conv3_2,
+                                    pool_size=(2, 2),
+                                    strides=(2, 2),
+                                    padding='valid',
+                                    name='pool3')  # 32 @ 4 * 4
+    with tf.name_scope('fc'):
+        pool3_flattened = tf.layers.flatten(pool3, name='pool3_flattened')
+        logits = tf.layers.dense(pool3_flattened, units=10, name='logits')  # logits is the input of output layer
+    return logits
+
+
 def main():
     # Assemble a graph
     # ========================================================================================== #
@@ -36,83 +110,9 @@ def main():
         X_reshaped = tf.reshape(X, shape=[-1, 3, 32, 32], name='X_reshaped')
         X_image = tf.transpose(X_reshaped, perm=[0, 2, 3, 1], name='X_image')  # 3 @ 32 * 32
 
-    def build_vgg_net(inputs, activation, kernel_initializer):
-        # two convolution block 1
-        conv1_1 = tf.layers.conv2d(inputs=inputs,
-                                   filters=32,
-                                   kernel_size=(3, 3),
-                                   strides=(1, 1),
-                                   padding='same',
-                                   activation=activation,
-                                   kernel_initializer=kernel_initializer,
-                                   name='conv1_1')  # 32 @ 32 * 32
-        conv1_2 = tf.layers.conv2d(inputs=conv1_1,
-                                   filters=32,
-                                   kernel_size=(3, 3),
-                                   strides=(1, 1),
-                                   padding='same',
-                                   activation=activation,
-                                   kernel_initializer=kernel_initializer,
-                                   name='conv1_2')  # 32 @ 32 * 32
-        pool1 = tf.layers.max_pooling2d(inputs=conv1_2,
-                                        pool_size=(2, 2),
-                                        strides=(2, 2),
-                                        padding='valid',
-                                        name='pool1')  # 32 @ 16 * 16
-        # two convolution block 2
-        conv2_1 = tf.layers.conv2d(inputs=pool1,
-                                   filters=32,
-                                   kernel_size=(3, 3),
-                                   strides=(1, 1),
-                                   padding='same',
-                                   activation=activation,
-                                   kernel_initializer=kernel_initializer,
-                                   name='conv2_1')  # 32 @ 16 * 16
-        conv2_2 = tf.layers.conv2d(inputs=conv2_1,
-                                   filters=32,
-                                   kernel_size=(3, 3),
-                                   strides=(1, 1),
-                                   padding='same',
-                                   activation=activation,
-                                   kernel_initializer=kernel_initializer,
-                                   name='conv2_2')  # 32 @ 16 * 16
-
-        pool2 = tf.layers.max_pooling2d(inputs=conv2_2,
-                                        pool_size=(2, 2),
-                                        strides=(2, 2),
-                                        padding='valid',
-                                        name='pool2')  # 32 @ 8 * 8
-        # two convolution block 3
-        conv3_1 = tf.layers.conv2d(inputs=pool2,
-                                   filters=32,
-                                   kernel_size=(3, 3),
-                                   strides=(1, 1),
-                                   padding='same',
-                                   activation=activation,
-                                   kernel_initializer=kernel_initializer,
-                                   name='conv3_1')  # 32 @ 8 * 8
-        conv3_2 = tf.layers.conv2d(inputs=conv3_1,
-                                   filters=32,
-                                   kernel_size=(3, 3),
-                                   strides=(1, 1),
-                                   padding='same',
-                                   activation=activation,
-                                   kernel_initializer=kernel_initializer,
-                                   name='conv3_2')  # 32 @ 8 * 8
-        pool3 = tf.layers.max_pooling2d(inputs=conv3_2,
-                                        pool_size=(2, 2),
-                                        strides=(2, 2),
-                                        padding='valid',
-                                        name='pool3')  # 32 @ 4 * 4
-
-        with tf.name_scope('fc'):
-            pool3_flattened = tf.layers.flatten(pool3, name='pool3_flattened')
-            logits = tf.layers.dense(pool3_flattened, units=10, name='logits')  # logits is the input of output layer
-        return logits
-
-    logits = build_vgg_net(X_image,
-                           tf.nn.relu,
-                           tf.truncated_normal_initializer(stddev=0.02))
+    logits = build_vgg_net(inputs=X_image,
+                           activation=tf.nn.relu,
+                           kernel_initializer=tf.truncated_normal_initializer(stddev=0.02))
 
     # loss
     with tf.name_scope('loss'):
